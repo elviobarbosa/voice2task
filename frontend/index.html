@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice to Tasks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎙️ Voice to Tasks</h1>
+      <p>Envie um áudio e deixe a IA extrair as tarefas para você.</p>
+    </header>
+    
+    <main>
+      <div class="upload-card">
+        <div class="file-input-wrapper">
+          <input type="file" id="audio" accept="audio/*" />
+          <div class="file-input-visual">
+            <span id="file-name">Selecione um arquivo de áudio...</span>
+          </div>
+        </div>
+        <button id="process-btn" onclick="send()">✨ Processar Áudio</button>
+      </div>
+
+      <div id="loading" class="hidden">
+        <div class="spinner"></div>
+        <p>Processando com IA... Isso pode levar alguns segundos.</p>
+      </div>
+
+      <div id="result-container" class="hidden">
+        <div class="summary-card">
+          <h2>Resumo</h2>
+          <p id="summary-text"></p>
+        </div>
+        
+        <div class="tasks-card">
+          <h2>Tarefas Extraídas</h2>
+          <ul id="tasks-list"></ul>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

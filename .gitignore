@@ -1,0 +1,21 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment
+.env
+
+# Uploads & Media
+backend/uploads/
+*.mp3
+*.wav
+*.ogg
+*.opus
+
+# System files
+.DS_Store
+
+# Test scripts
+test_*.js
+server.log
