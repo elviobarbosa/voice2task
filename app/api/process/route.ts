@@ -8,6 +8,8 @@ import openai from "@/lib/openai";
 import { SYSTEM_PROMPT } from "@/lib/prompt";
 import { toFile } from "openai";
 
+export const runtime = "nodejs";
+
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 
 export async function POST(req: NextRequest) {
