@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { UploadCloud, Loader2 } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { Filesystem } from "@capacitor/filesystem";
+import { CapacitorShareTarget } from "@capgo/capacitor-share-target";
 
 interface UploadProps {
   onSuccess: (data: any) => void;
@@ -9,29 +12,25 @@ interface UploadProps {
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 
+let pendingShare: any = null;
+
+if (typeof window !== "undefined" && Capacitor.isNativePlatform()) {
+  CapacitorShareTarget.addListener('shareReceived', async (event: any) => {
+    alert("Share nativo interceptado na raiz!"); // DEBUG
+    pendingShare = event;
+    window.dispatchEvent(new CustomEvent('appShareReceived', { detail: event }));
+  });
+}
+
 export default function Upload({ onSuccess }: UploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError("");
-    const selectedFile = e.target.files?.[0];
-    
-    if (selectedFile) {
-      if (selectedFile.size > MAX_FILE_SIZE) {
-        setError("O arquivo é muito grande. O limite máximo é 15MB.");
-        setFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-        return;
-      }
-      setFile(selectedFile);
-    }
-  };
-
-  const handleProcess = async () => {
-    if (!file) {
+  const handleProcess = async (fileToProcess?: File) => {
+    const targetFile = fileToProcess || file;
+    if (!targetFile) {
       setError("Por favor, selecione um arquivo de áudio primeiro.");
       return;
     }
@@ -40,9 +39,11 @@ export default function Upload({ onSuccess }: UploadProps) {
     setError("");
 
     const formData = new FormData();
-    formData.append("audio", file);
+    formData.append("audio", targetFile);
 
     try {
+      // Se você quiser apontar para a Vercel, pode trocar a URL abaixo temporariamente
+      // para const res = await fetch("https://sua-url-na-vercel.app/api/process", ...)
       const res = await fetch("/api/process", {
         method: "POST",
         body: formData,
@@ -62,6 +63,77 @@ export default function Upload({ onSuccess }: UploadProps) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const processShare = async (event: any) => {
+      // Removemos os alerts de DEBUG para não poluir a tela
+      const { files } = event;
+      if (files && files.length > 0) {
+        const fileData = files[0];
+        const isAudio = fileData.mimeType?.startsWith('audio/') || 
+                        fileData.path?.match(/\.(m4a|mp3|wav|ogg|opus|amr)$/i);
+        
+        if (isAudio) {
+          try {
+            const contents = await Filesystem.readFile({
+              path: fileData.path
+            });
+            
+            const base64Data = contents.data as string;
+            const byteCharacters = atob(base64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: fileData.mimeType || "audio/m4a" });
+            
+            const newFile = new File([blob], fileData.name || "audio_compartilhado", { 
+              type: blob.type 
+            });
+            
+            setFile(newFile);
+            setError("");
+            
+            // 🔥 AUTO-PROCESSAR assim que carregar o arquivo
+            handleProcess(newFile);
+
+          } catch (err: any) {
+            setError("Erro ao carregar o arquivo compartilhado: " + err.message);
+          }
+        } else {
+          setError("O arquivo compartilhado não é um áudio suportado.");
+        }
+      }
+      pendingShare = null;
+    };
+
+    if (pendingShare) {
+      processShare(pendingShare);
+    }
+
+    const handleShare = (e: any) => processShare(e.detail);
+    window.addEventListener('appShareReceived', handleShare as EventListener);
+    
+    return () => {
+      window.removeEventListener('appShareReceived', handleShare as EventListener);
+    };
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError("");
+    const selectedFile = e.target.files?.[0];
+    
+    if (selectedFile) {
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        setError("O arquivo é muito grande. O limite máximo é 15MB.");
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+      setFile(selectedFile);
     }
   };
 
