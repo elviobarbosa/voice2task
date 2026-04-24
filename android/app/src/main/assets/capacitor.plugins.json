@@ -1,0 +1,10 @@
+[
+	{
+		"pkg": "@capacitor/filesystem",
+		"classpath": "com.capacitorjs.plugins.filesystem.FilesystemPlugin"
+	},
+	{
+		"pkg": "@capgo/capacitor-share-target",
+		"classpath": "app.capgo.sharetarget.CapacitorShareTargetPlugin"
+	}
+]
