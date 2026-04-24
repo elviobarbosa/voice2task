@@ -1,9 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-import os from "os";
-import { v4 as uuidv4 } from "uuid";
-import ffmpeg from "fluent-ffmpeg";
 import openai from "@/lib/openai";
 import { SYSTEM_PROMPT } from "@/lib/prompt";
 import { toFile } from "openai";
@@ -28,32 +23,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Preparar caminhos temporários
-    const tempDir = os.tmpdir();
-    const fileId = uuidv4();
-    
-    // Extrai extensão original
-    const originalExt = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() || 'ogg' : 'ogg';
-    const tempOriginalPath = path.join(tempDir, `${fileId}.${originalExt}`);
-    const tempMp3Path = path.join(tempDir, `${fileId}.mp3`);
-
-    // Salvar o ArrayBuffer em um arquivo temporário no disco
+    // O WhatsApp costuma enviar arquivos com a extensão .opus ou MIME types que o Whisper recusa.
+    // No entanto, o codec (Opus) é totalmente suportado pelo Whisper se disser que é .ogg.
+    // Portanto, convertemos o arquivo em um Buffer e passamos para a API com o nome "audio.ogg".
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    fs.writeFileSync(tempOriginalPath, buffer);
-
-    // Converter para MP3 garantindo o suporte no Whisper
-    await new Promise((resolve, reject) => {
-      ffmpeg(tempOriginalPath)
-        .toFormat('mp3')
-        .on('end', resolve)
-        .on('error', reject)
-        .save(tempMp3Path);
-    });
+    const audioFile = await toFile(buffer, "audio.ogg", { type: "audio/ogg" });
 
     // 1. Transcrição com Whisper
     const transcription = await openai.audio.transcriptions.create({
-      file: await toFile(fs.createReadStream(tempMp3Path), "audio.mp3"),
+      file: audioFile,
       model: "whisper-1",
     });
 
@@ -68,10 +47,6 @@ export async function POST(req: NextRequest) {
       ],
       response_format: { type: "json_object" },
     });
-
-    // Limpeza dos arquivos temporários
-    if (fs.existsSync(tempOriginalPath)) fs.unlinkSync(tempOriginalPath);
-    if (fs.existsSync(tempMp3Path)) fs.unlinkSync(tempMp3Path);
 
     // Parse do JSON retornado pelo modelo
     let resultJson;
