@@ -5,8 +5,7 @@ const config: CapacitorConfig = {
   appName: 'voice-task',
   webDir: 'public',
   server: {
-    url: 'http://192.168.0.94:3000',
-    cleartext: true
+    url: 'https://voice2task-ten.vercel.app',
   }
 };
 

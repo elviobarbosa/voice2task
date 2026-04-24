@@ -217,7 +217,7 @@ export default function Upload({ onSuccess }: UploadProps) {
       ) : null}
 
       <button
-        onClick={handleProcess}
+        onClick={() => handleProcess()}
         disabled={!file || loading}
         className="w-full py-4 rounded-xl font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
       >
