@@ -7,19 +7,29 @@ export const runtime = "nodejs";
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("audio") as File;
 
     if (!file) {
-      return NextResponse.json({ error: "Nenhum arquivo enviado." }, { status: 400 });
+      return NextResponse.json({ error: "Nenhum arquivo enviado." }, { status: 400, headers: corsHeaders });
     }
 
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
         { error: "O arquivo excede o limite máximo de 15MB." },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -53,15 +63,15 @@ export async function POST(req: NextRequest) {
     try {
       resultJson = JSON.parse(completion.choices[0].message.content || "{}");
     } catch (e) {
-      return NextResponse.json({ error: "Erro ao interpretar resposta da IA." }, { status: 500 });
+      return NextResponse.json({ error: "Erro ao interpretar resposta da IA." }, { status: 500, headers: corsHeaders });
     }
 
-    return NextResponse.json(resultJson);
+    return NextResponse.json(resultJson, { headers: corsHeaders });
   } catch (error: any) {
     console.error("API Route Error:", error);
     return NextResponse.json(
       { error: error.message || "Erro interno no servidor." },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

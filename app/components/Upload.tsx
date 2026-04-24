@@ -42,12 +42,13 @@ export default function Upload({ onSuccess }: UploadProps) {
     formData.append("audio", targetFile);
 
     try {
-      // Se você quiser apontar para a Vercel, pode trocar a URL abaixo temporariamente
-      // para const res = await fetch("https://sua-url-na-vercel.app/api/process", ...)
-      const res = await fetch("/api/process", {
+      alert("Iniciando fetch para a Vercel..."); // DEBUG
+      const res = await fetch("https://voice2task-ten.vercel.app/api/process", {
         method: "POST",
         body: formData,
       });
+
+      alert("Resposta da Vercel recebida. Status: " + res.status); // DEBUG
 
       const data = await res.json();
 
@@ -60,6 +61,7 @@ export default function Upload({ onSuccess }: UploadProps) {
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err: any) {
+      alert("Erro no handleProcess: " + err.message); // DEBUG PARA CORS
       setError(err.message);
     } finally {
       setLoading(false);
@@ -68,44 +70,58 @@ export default function Upload({ onSuccess }: UploadProps) {
 
   useEffect(() => {
     const processShare = async (event: any) => {
-      // Removemos os alerts de DEBUG para não poluir a tela
-      const { files } = event;
-      if (files && files.length > 0) {
-        const fileData = files[0];
-        const isAudio = fileData.mimeType?.startsWith('audio/') || 
-                        fileData.path?.match(/\.(m4a|mp3|wav|ogg|opus|amr)$/i);
+      alert("React capturou o share! Verificando evento..."); // DEBUG
+      try {
+        const eventKeys = event ? Object.keys(event).join(", ") : "null";
+        alert(`Evento contém: ${eventKeys}`);
         
-        if (isAudio) {
-          try {
-            const contents = await Filesystem.readFile({
-              path: fileData.path
-            });
-            
-            const base64Data = contents.data as string;
-            const byteCharacters = atob(base64Data);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
+        const { files } = event;
+        if (files && files.length > 0) {
+          const fileData = files[0];
+          alert(`Arquivo: mime=${fileData.mimeType}, path=${fileData.path}`);
+          
+          const isAudio = fileData.mimeType?.startsWith('audio/') || 
+                          fileData.path?.match(/\.(m4a|mp3|wav|ogg|opus|amr)$/i);
+          
+          if (isAudio) {
+            try {
+              const contents = await Filesystem.readFile({
+                path: fileData.path
+              });
+              
+              const base64Data = contents.data as string;
+              const byteCharacters = atob(base64Data);
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                  byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              const blob = new Blob([byteArray], { type: fileData.mimeType || "audio/m4a" });
+              
+              const newFile = new File([blob], fileData.name || "audio_compartilhado", { 
+                type: blob.type 
+              });
+              
+              setFile(newFile);
+              setError("");
+              alert("Iniciando auto-processamento...");
+              
+              // 🔥 AUTO-PROCESSAR assim que carregar o arquivo
+              handleProcess(newFile);
+  
+            } catch (err: any) {
+              alert("Erro no Filesystem: " + err.message);
+              setError("Erro ao carregar o arquivo compartilhado: " + err.message);
             }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: fileData.mimeType || "audio/m4a" });
-            
-            const newFile = new File([blob], fileData.name || "audio_compartilhado", { 
-              type: blob.type 
-            });
-            
-            setFile(newFile);
-            setError("");
-            
-            // 🔥 AUTO-PROCESSAR assim que carregar o arquivo
-            handleProcess(newFile);
-
-          } catch (err: any) {
-            setError("Erro ao carregar o arquivo compartilhado: " + err.message);
+          } else {
+            alert("Não é áudio: " + fileData.mimeType);
+            setError("O arquivo compartilhado não é um áudio suportado.");
           }
         } else {
-          setError("O arquivo compartilhado não é um áudio suportado.");
+          alert("Nenhum arquivo na propriedade 'files'.");
         }
+      } catch (err: any) {
+         alert("Erro geral no processShare: " + err.message);
       }
       pendingShare = null;
     };
@@ -134,6 +150,9 @@ export default function Upload({ onSuccess }: UploadProps) {
         return;
       }
       setFile(selectedFile);
+      
+      // 🔥 AUTO-PROCESSAR também na seleção manual de arquivo
+      handleProcess(selectedFile);
     }
   };
 
