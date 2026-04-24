@@ -19,14 +19,19 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("API /process: Recebendo requisição");
     const formData = await req.formData();
     const file = formData.get("audio") as File;
 
     if (!file) {
+      console.error("API /process: Nenhum arquivo enviado");
       return NextResponse.json({ error: "Nenhum arquivo enviado." }, { status: 400, headers: corsHeaders });
     }
 
+    console.log(`API /process: Arquivo recebido - Nome: ${file.name}, Tamanho: ${file.size}, Tipo: ${file.type}`);
+
     if (file.size > MAX_FILE_SIZE) {
+      console.error("API /process: Arquivo muito grande");
       return NextResponse.json(
         { error: "O arquivo excede o limite máximo de 15MB." },
         { status: 400, headers: corsHeaders }
@@ -41,14 +46,17 @@ export async function POST(req: NextRequest) {
     const audioFile = await toFile(buffer, "audio.ogg", { type: "audio/ogg" });
 
     // 1. Transcrição com Whisper
+    console.log("API /process: Iniciando transcrição com Whisper");
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: "whisper-1",
     });
 
     const transcriptionText = transcription.text;
+    console.log("API /process: Transcrição concluída:", transcriptionText.substring(0, 100) + "...");
 
     // 2. Extração de tarefas com GPT-4o-mini
+    console.log("API /process: Iniciando extração com GPT-4o-mini");
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -58,14 +66,19 @@ export async function POST(req: NextRequest) {
       response_format: { type: "json_object" },
     });
 
+    console.log("API /process: Extração concluída");
+
     // Parse do JSON retornado pelo modelo
     let resultJson;
     try {
       resultJson = JSON.parse(completion.choices[0].message.content || "{}");
+      console.log("API /process: JSON parseado com sucesso");
     } catch (e) {
+      console.error("API /process: Erro ao parsear JSON da IA");
       return NextResponse.json({ error: "Erro ao interpretar resposta da IA." }, { status: 500, headers: corsHeaders });
     }
 
+    console.log("API /process: Retornando resultado");
     return NextResponse.json(resultJson, { headers: corsHeaders });
   } catch (error: any) {
     console.error("API Route Error:", error);
