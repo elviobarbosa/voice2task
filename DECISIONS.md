@@ -4,6 +4,12 @@
 - English and Portuguese speakers
 - Distribution: Google Play Store (Android)
 
+## i18n
+- Library: `next-intl`
+- Language detection: `navigator.language` (auto, no manual toggle)
+- Supported: `pt` (default fallback) + `en`
+- AI tasks: respond in the language of the audio — EN audio → EN tasks, PT audio → PT tasks
+
 ---
 
 ## Plans & Pricing

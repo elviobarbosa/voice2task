@@ -64,27 +64,55 @@
 ## Stage 2 — Onboarding
 *Goal: new user understands the product before hitting paywall*
 
-- [ ] Onboarding screen 1: "Turn voice into tasks" (value prop)
-- [ ] Onboarding screen 2: "Works in meetings, voice memos, calls"
-- [ ] Onboarding screen 3: "Share with your team"
-- [ ] Onboarding screen 4: Plan selection (Personal / Team / Business)
-- [ ] Skip onboarding if user already has subscription
-- [ ] Mark onboarding as complete in Supabase user profile
+- [x] Onboarding screen 1: "Voz vira tarefas" (value prop) — PT + EN
+- [x] Onboarding screen 2: "Funciona em qualquer situação" (use cases)
+- [x] Onboarding screen 3: "Compartilhe com seu time"
+- [x] Onboarding screen 4: Plan selection preview (Personal / Team / Business)
+- [x] Skip onboarding if `profiles.onboarding_completed = true`
+- [x] Mark onboarding as complete on "Começar" → `profiles.onboarding_completed = true`
+- [x] AuthProvider redireciona novo usuário → `/onboarding` automaticamente
 
-**Deliverable:** First-time user is guided to plan selection.
+**Deliverable:** First-time user is guided to plan selection. ✅
 
 ---
 
 ## Stage 3 — History
 *Goal: users can see past processings*
 
-- [ ] History screen: list of processings (date, duration, preview of tasks)
-- [ ] Detail screen: full result for a processing
-- [ ] Empty state for new users
-- [ ] Filter by date (optional, v2)
-- [ ] Usage meter: "X min used of Y min this month"
+- [x] History screen (`/history`): lista com data, duração, preview de tarefas
+- [x] Detail screen (`/history/[id]`): resultado completo reutilizando `Result` component
+- [x] Empty state para novos usuários
+- [ ] Filter by date (v2)
+- [x] Usage meter na home e no histórico: "X / 60 min este mês" com barra de progresso
+- [x] Barra muda de cor: azul → âmbar (80%) → vermelho (100%)
 
-**Deliverable:** Users can review past work and track usage.
+**Deliverable:** Users can review past work and track usage. ✅
+
+---
+
+## Stage 3.5 — i18n (PT + EN)
+*Goal: app detects device language and serves correct language automatically*
+
+**Approach:** `next-intl` + `navigator.language` detection on client. No manual toggle — fully automatic.
+
+### Setup
+- [ ] Install `next-intl`
+- [ ] Create `messages/pt.json` + `messages/en.json`
+- [ ] Create `lib/i18n.ts` — detect `navigator.language`, default to `en` if not `pt`
+- [ ] Wrap app with `NextIntlClientProvider` in `layout.tsx`
+
+### Translate UI strings
+- [ ] Auth screens (login, signup, forgot-password)
+- [ ] Onboarding screens (remove inline EN text, use translations)
+- [ ] History page (labels, empty state, usage meter)
+- [ ] Home page (header, buttons, errors)
+- [ ] Error messages from API route
+
+### API / AI
+- [ ] Update `SYSTEM_PROMPT` to detect audio language and respond in same language
+- [ ] Return task text in audio's language (EN audio → EN tasks, PT audio → PT tasks)
+
+**Deliverable:** PT device → app in Portuguese. EN device → app in English. Audio language independent of UI language.
 
 ---
 
