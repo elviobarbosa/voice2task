@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase/client";
 import { useAuth } from "@/app/components/AuthProvider";
 import { formatDuration, formatDate, minutesUsedThisMonth } from "@/lib/utils";
 import { ChevronRight, Clock, Mic } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type Processing = {
   id: string;
@@ -16,6 +17,7 @@ type Processing = {
 };
 
 export default function HistoryPage() {
+  const t = useTranslations("history");
   const [processings, setProcessings] = useState<Processing[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -42,12 +44,12 @@ export default function HistoryPage() {
       <div className="max-w-2xl mx-auto space-y-8">
 
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Histórico</h1>
+          <h1 className="text-2xl font-bold text-white">{t("title")}</h1>
           <button
             onClick={() => router.back()}
             className="text-sm text-slate-500 hover:text-slate-300 transition"
           >
-            ← Voltar
+            {t("back")}
           </button>
         </div>
 
@@ -55,7 +57,7 @@ export default function HistoryPage() {
         <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-slate-400 flex items-center gap-1.5">
-              <Clock className="w-4 h-4" /> Uso este mês
+              <Clock className="w-4 h-4" /> {t("usageThisMonth")}
             </span>
             <span className="text-white font-medium">{minutesUsed} / {minutesLimit} min</span>
           </div>
@@ -77,19 +79,19 @@ export default function HistoryPage() {
         ) : processings.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-4 text-center">
             <Mic className="w-12 h-12 text-slate-700" />
-            <p className="text-slate-400">Nenhum áudio processado ainda.</p>
+            <p className="text-slate-400">{t("noAudioYet")}</p>
             <button
               onClick={() => router.push("/")}
               className="text-indigo-400 hover:text-indigo-300 text-sm"
             >
-              Processar primeiro áudio →
+              {t("processFirst")}
             </button>
           </div>
         ) : (
           <ul className="space-y-3">
             {processings.map((p) => {
               const taskCount = p.result_json?.tasks?.length ?? 0;
-              const preview = p.result_json?.summary ?? p.result_json?.tasks?.[0]?.text ?? "Sem resumo";
+              const preview = p.result_json?.summary ?? p.result_json?.tasks?.[0]?.text ?? t("noSummary");
               return (
                 <li key={p.id}>
                   <Link
@@ -102,7 +104,7 @@ export default function HistoryPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-white font-medium truncate">{preview}</p>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        {taskCount} tarefa{taskCount !== 1 ? "s" : ""} · {formatDuration(p.duration_seconds)} · {formatDate(p.created_at)}
+                        {t("tasks", { count: taskCount })} · {formatDuration(p.duration_seconds)} · {formatDate(p.created_at)}
                       </p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition shrink-0" />

@@ -7,10 +7,12 @@ import Result from "./components/Result";
 import { useAuth } from "./components/AuthProvider";
 import { supabase } from "@/lib/supabase/client";
 import { History, Clock } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const MINUTES_LIMIT = 60;
 
 export default function Home() {
+  const t = useTranslations("home");
   const [result, setResult] = useState<any>(null);
   const [minutesUsed, setMinutesUsed] = useState(0);
   const { user, signOut } = useAuth();
@@ -44,10 +46,10 @@ export default function Home() {
             href="/history"
             className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-300 transition"
           >
-            <History className="w-4 h-4" /> Histórico
+            <History className="w-4 h-4" /> {t("history")}
           </Link>
           <button onClick={signOut} className="text-xs text-slate-500 hover:text-slate-300 transition">
-            {user?.email} · Sair
+            {user?.email} · {t("signOut")}
           </button>
         </div>
 
@@ -56,14 +58,14 @@ export default function Home() {
             🎙️ Voice to Tasks
           </h1>
           <p className="text-lg text-slate-400 max-w-xl mx-auto">
-            Envie seu áudio e deixe a Inteligência Artificial extrair todas as tarefas, prazos e responsáveis para você.
+            {t("subtitle")}
           </p>
         </header>
 
         {/* usage meter */}
         <div className="max-w-xl mx-auto w-full space-y-1.5">
           <div className="flex justify-between text-xs text-slate-500">
-            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Uso este mês</span>
+            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {t("usageThisMonth")}</span>
             <span className={minutesUsed >= MINUTES_LIMIT ? "text-red-400" : ""}>{minutesUsed} / {MINUTES_LIMIT} min</span>
           </div>
           <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
@@ -84,7 +86,7 @@ export default function Home() {
                 onClick={() => setResult(null)}
                 className="text-sm font-medium text-slate-400 hover:text-white transition-colors underline underline-offset-4"
               >
-                Processar outro áudio
+                {t("processAnother")}
               </button>
             </div>
           </div>

@@ -5,72 +5,25 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { useAuth } from "@/app/components/AuthProvider";
 import { ChevronRight, Mic, Users, Building2, Check } from "lucide-react";
-
-const SCREENS = [
-  {
-    id: 1,
-    emoji: "🎙️",
-    title: "Voz vira tarefas",
-    titleEn: "Voice becomes tasks",
-    body: "Grave ou compartilhe qualquer áudio. A IA extrai todas as tarefas, prazos e responsáveis automaticamente.",
-    bodyEn: "Record or share any audio. AI extracts all tasks, deadlines, and owners automatically.",
-  },
-  {
-    id: 2,
-    emoji: "⚡",
-    title: "Funciona em qualquer situação",
-    titleEn: "Works everywhere",
-    body: "Reuniões, recados de voz, ligações, notas pessoais — qualquer áudio se torna uma lista de ações.",
-    bodyEn: "Meetings, voice memos, calls, personal notes — any audio becomes an action list.",
-  },
-  {
-    id: 3,
-    emoji: "👥",
-    title: "Compartilhe com seu time",
-    titleEn: "Share with your team",
-    body: "Adicione membros ao seu plano. Todos acessam o histórico e as tarefas extraídas em um só lugar.",
-    bodyEn: "Add members to your plan. Everyone accesses history and extracted tasks in one place.",
-  },
-];
+import { useTranslations } from "next-intl";
 
 const PLANS = [
-  {
-    id: "personal",
-    icon: <Mic className="w-5 h-5" />,
-    name: "Personal",
-    price: "$5.99",
-    seats: "1 usuário",
-    minutes: "60 min/mês",
-    highlight: false,
-  },
-  {
-    id: "team",
-    icon: <Users className="w-5 h-5" />,
-    name: "Team",
-    price: "$19.99",
-    seats: "5 usuários",
-    minutes: "60 min/usuário",
-    highlight: true,
-  },
-  {
-    id: "business",
-    icon: <Building2 className="w-5 h-5" />,
-    name: "Business",
-    price: "$49.99",
-    seats: "15 usuários",
-    minutes: "60 min/usuário",
-    highlight: false,
-  },
+  { id: "personal", icon: <Mic className="w-5 h-5" />, name: "Personal", price: "$5.99", planKey: "personal" as const, highlight: false },
+  { id: "team", icon: <Users className="w-5 h-5" />, name: "Team", price: "$19.99", planKey: "team" as const, highlight: true },
+  { id: "business", icon: <Building2 className="w-5 h-5" />, name: "Business", price: "$49.99", planKey: "business" as const, highlight: false },
 ];
 
+const SCREEN_COUNT = 3;
+
 export default function OnboardingPage() {
-  const [step, setStep] = useState(0); // 0-2 = screens, 3 = plans
+  const t = useTranslations("onboarding");
+  const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const { user, refreshProfile } = useAuth();
   const router = useRouter();
 
-  const isLastContent = step === SCREENS.length - 1;
-  const isPlans = step === SCREENS.length;
+  const isLastContent = step === SCREEN_COUNT - 1;
+  const isPlans = step === SCREEN_COUNT;
 
   const handleNext = () => {
     if (!isPlans) { setStep((s) => s + 1); return; }
@@ -85,13 +38,15 @@ export default function OnboardingPage() {
     router.replace("/");
   };
 
+  const screens = t.raw("screens") as { title: string; body: string }[];
+
   return (
     <main className="min-h-screen flex flex-col px-6 py-12">
       <div className="flex-1 flex flex-col max-w-md mx-auto w-full">
 
         {/* progress dots */}
         <div className="flex justify-center gap-2 mb-12">
-          {[...SCREENS, { id: "plans" }].map((_, i) => (
+          {Array.from({ length: SCREEN_COUNT + 1 }).map((_, i) => (
             <div
               key={i}
               className={`h-1.5 rounded-full transition-all duration-300 ${
@@ -104,11 +59,10 @@ export default function OnboardingPage() {
         {/* content screens */}
         {!isPlans && (
           <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
-            <div className="text-7xl">{SCREENS[step].emoji}</div>
+            <div className="text-7xl">{["🎙️", "⚡", "👥"][step]}</div>
             <div className="space-y-3">
-              <h1 className="text-2xl font-bold text-white">{SCREENS[step].title}</h1>
-              <p className="text-sm text-slate-400 leading-relaxed">{SCREENS[step].body}</p>
-              <p className="text-xs text-slate-600 italic">{SCREENS[step].bodyEn}</p>
+              <h1 className="text-2xl font-bold text-white">{screens[step].title}</h1>
+              <p className="text-sm text-slate-400 leading-relaxed">{screens[step].body}</p>
             </div>
           </div>
         )}
@@ -117,17 +71,15 @@ export default function OnboardingPage() {
         {isPlans && (
           <div className="flex-1 flex flex-col space-y-4">
             <div className="text-center space-y-2 mb-2">
-              <h1 className="text-2xl font-bold text-white">Escolha seu plano</h1>
-              <p className="text-sm text-slate-400">Cancele quando quiser. Sem compromisso.</p>
+              <h1 className="text-2xl font-bold text-white">{t("plans.title")}</h1>
+              <p className="text-sm text-slate-400">{t("plans.subtitle")}</p>
             </div>
 
             {PLANS.map((plan) => (
               <div
                 key={plan.id}
                 className={`p-4 rounded-2xl border transition ${
-                  plan.highlight
-                    ? "border-indigo-500 bg-indigo-500/10"
-                    : "border-white/10 bg-white/5"
+                  plan.highlight ? "border-indigo-500 bg-indigo-500/10" : "border-white/10 bg-white/5"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -139,19 +91,21 @@ export default function OnboardingPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-white">{plan.name}</span>
                         {plan.highlight && (
-                          <span className="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-full">Popular</span>
+                          <span className="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-full">{t("plans.popular")}</span>
                         )}
                       </div>
-                      <p className="text-xs text-slate-500">{plan.seats} · {plan.minutes}</p>
+                      <p className="text-xs text-slate-500">
+                        {t(`plans.${plan.planKey}.seats`)} · {t(`plans.${plan.planKey}.minutes`)}
+                      </p>
                     </div>
                   </div>
-                  <span className="font-bold text-white">{plan.price}<span className="text-xs text-slate-500">/mês</span></span>
+                  <span className="font-bold text-white">{plan.price}<span className="text-xs text-slate-500">{t("plans.perMonth")}</span></span>
                 </div>
               </div>
             ))}
 
             <p className="text-center text-xs text-slate-600 pt-2">
-              Você poderá assinar após explorar o app.
+              {t("plans.subscribeAfter")}
             </p>
           </div>
         )}
@@ -166,9 +120,9 @@ export default function OnboardingPage() {
             {saving ? (
               <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
             ) : isPlans ? (
-              <><Check className="w-5 h-5" /> Começar</>
+              <><Check className="w-5 h-5" /> {t("nav.start")}</>
             ) : (
-              <><ChevronRight className="w-5 h-5" /> {isLastContent ? "Ver planos" : "Próximo"}</>
+              <><ChevronRight className="w-5 h-5" /> {isLastContent ? t("nav.seePlans") : t("nav.next")}</>
             )}
           </button>
 
@@ -177,7 +131,7 @@ export default function OnboardingPage() {
               onClick={() => setStep((s) => s - 1)}
               className="w-full py-2 text-sm text-slate-500 hover:text-slate-300 transition"
             >
-              Voltar
+              {t("nav.back")}
             </button>
           )}
         </div>

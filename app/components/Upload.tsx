@@ -1,21 +1,38 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { UploadCloud, Loader2 } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
 import { CapacitorShareTarget } from "@capgo/capacitor-share-target";
 import { supabase } from "@/lib/supabase/client";
+import { useTranslations } from "next-intl";
 
-interface UploadProps {
-  onSuccess: (data: any) => void;
+interface ProcessResult {
+  tasks: { text: string; deadline: string | null; assignee: string | null; priority: string }[];
+  summary: string;
 }
 
-const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
+interface UploadProps {
+  onSuccess: (data: ProcessResult) => void;
+}
 
-let pendingShare: any = null;
+interface ShareFile {
+  uri?: string;
+  path?: string;
+  name?: string;
+  mimeType?: string;
+}
+
+interface ShareEvent {
+  files?: ShareFile[];
+}
+
+const MAX_FILE_SIZE = 15 * 1024 * 1024;
+
+let pendingShare: ShareEvent | null = null;
 
 if (typeof window !== "undefined" && Capacitor.isNativePlatform()) {
-  CapacitorShareTarget.addListener('shareReceived', async (event: any) => {
+  CapacitorShareTarget.addListener('shareReceived', (event: ShareEvent) => {
     console.log("Share nativo interceptado na raiz!");
     pendingShare = event;
     window.dispatchEvent(new CustomEvent('appShareReceived', { detail: event }));
@@ -23,6 +40,7 @@ if (typeof window !== "undefined" && Capacitor.isNativePlatform()) {
 }
 
 export default function Upload({ onSuccess }: UploadProps) {
+  const t = useTranslations("upload");
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -35,11 +53,11 @@ export default function Upload({ onSuccess }: UploadProps) {
     setDebugMessage(message);
   };
 
-  const handleProcess = async (fileToProcess?: File) => {
+  const handleProcess = useCallback(async (fileToProcess?: File) => {
     console.log('handleProcess');
     const targetFile = fileToProcess || file;
     if (!targetFile) {
-      setError("Por favor, selecione um arquivo de áudio primeiro.");
+      setError(t("noFile"));
       return;
     }
 
@@ -60,31 +78,31 @@ export default function Upload({ onSuccess }: UploadProps) {
 
       console.log("Resposta recebida. Status:", res.status);
 
-      const data = await res.json();
+      const data = await res.json() as ProcessResult & { error?: string };
 
       if (!res.ok) {
         throw new Error(data.error || "Erro ao processar áudio.");
       }
 
       onSuccess(data);
-      // Reset form
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch (err: any) {
-      console.error("Erro no handleProcess:", err.message);
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("Erro no handleProcess:", message);
+      setError(message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [file, t, onSuccess]);
 
   useEffect(() => {
-    const processShare = async (event: any) => {
+    const processShare = async (event: ShareEvent) => {
       console.log("React capturou o share! Verificando evento...");
       try {
         const eventKeys = event ? Object.keys(event).join(", ") : "null";
         console.log(`Evento contém: ${eventKeys}`);
-        
+
         const { files } = event;
         if (files && files.length > 0) {
           const fileData = files[0];
@@ -96,7 +114,7 @@ export default function Upload({ onSuccess }: UploadProps) {
 
           if (isAudio) {
             try {
-              const webPath = Capacitor.convertFileSrc(fileUri);
+              const webPath = Capacitor.convertFileSrc(fileUri ?? "");
               console.log("webPath:", webPath);
               const response = await fetch(webPath);
               if (!response.ok) throw new Error(`fetch falhou: ${response.status}`);
@@ -111,19 +129,21 @@ export default function Upload({ onSuccess }: UploadProps) {
               console.log("Iniciando auto-processamento...");
               handleProcess(newFile);
 
-            } catch (err: any) {
-              console.error("Erro no share:", err.message);
-              setError("Erro ao carregar o arquivo compartilhado: " + err.message);
+            } catch (err: unknown) {
+              const message = err instanceof Error ? err.message : String(err);
+              console.error("Erro no share:", message);
+              setError(t("sharedError") + message);
             }
           } else {
             console.warn("Não é áudio:", fileData.mimeType);
-            setError("O arquivo compartilhado não é um áudio suportado.");
+            setError(t("sharedNotAudio"));
           }
         } else {
           alert("Nenhum arquivo na propriedade 'files'.");
         }
-      } catch (err: any) {
-         alert("Erro geral no processShare: " + err.message);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        alert("Erro geral no processShare: " + message);
       }
       pendingShare = null;
     };
@@ -132,13 +152,13 @@ export default function Upload({ onSuccess }: UploadProps) {
       processShare(pendingShare);
     }
 
-    const handleShare = (e: any) => processShare(e.detail);
-    window.addEventListener('appShareReceived', handleShare as EventListener);
-    
+    const handleShare = (e: Event) => processShare((e as CustomEvent<ShareEvent>).detail);
+    window.addEventListener('appShareReceived', handleShare);
+
     return () => {
-      window.removeEventListener('appShareReceived', handleShare as EventListener);
+      window.removeEventListener('appShareReceived', handleShare);
     };
-  }, []);
+  }, [handleProcess, t]);
 
   const handleFileSelect = (files: FileList | null) => {
     console.log("handleFileSelect chamado", files);
@@ -148,7 +168,7 @@ export default function Upload({ onSuccess }: UploadProps) {
     if (selectedFile) {
       console.log("Arquivo selecionado:", selectedFile.name, selectedFile.type, selectedFile.size);
       if (selectedFile.size > MAX_FILE_SIZE) {
-        setError("O arquivo é muito grande. O limite máximo é 15MB.");
+        setError(t("tooLarge"));
         setFile(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
         return;
@@ -190,9 +210,9 @@ export default function Upload({ onSuccess }: UploadProps) {
         >
           <UploadCloud className={`w-10 h-10 mb-3 ${file ? 'text-indigo-400' : 'text-slate-400'}`} />
           <p className="text-center text-slate-300 font-medium">
-            {file ? file.name : "Selecione ou arraste um arquivo de áudio"}
+            {file ? file.name : t("selectOrDrag")}
           </p>
-          <p className="text-xs text-slate-500 mt-2">MP3, WAV, M4A, OGG, OPUS (Máx. 15MB)</p>
+          <p className="text-xs text-slate-500 mt-2">{t("formats")}</p>
           <button
             type="button"
             onClick={(event) => {
@@ -202,7 +222,7 @@ export default function Upload({ onSuccess }: UploadProps) {
             }}
             className="mt-4 px-4 py-2 rounded-full bg-indigo-600 text-white text-sm hover:bg-indigo-500"
           >
-            Selecionar áudio manualmente
+            {t("selectManually")}
           </button>
         </div>
       </div>
@@ -227,10 +247,10 @@ export default function Upload({ onSuccess }: UploadProps) {
         {loading ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            Processando com IA...
+            {t("processing")}
           </>
         ) : (
-          "✨ Processar Áudio"
+          t("process")
         )}
       </button>
     </div>

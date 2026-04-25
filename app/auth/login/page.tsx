@@ -4,8 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function LoginPage() {
+  const t = useTranslations("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,7 +43,7 @@ export default function LoginPage() {
           <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400">
             Voice to Tasks
           </h1>
-          <p className="text-slate-400 text-sm">Entre na sua conta</p>
+          <p className="text-slate-400 text-sm">{t("subtitle")}</p>
         </div>
 
         <div className="space-y-3">
@@ -55,7 +57,7 @@ export default function LoginPage() {
             ) : (
               <GoogleIcon />
             )}
-            Continuar com Google
+            {t("continueWithGoogle")}
           </button>
 
           <button
@@ -68,34 +70,34 @@ export default function LoginPage() {
             ) : (
               <FacebookIcon />
             )}
-            Continuar com Facebook
+            {t("continueWithFacebook")}
           </button>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-white/10" />
-          <span className="text-xs text-slate-500">ou</span>
+          <span className="text-xs text-slate-500">{t("or")}</span>
           <div className="flex-1 h-px bg-white/10" />
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm text-slate-300">Email</label>
+            <label className="text-sm text-slate-300">{t("emailLabel")}</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="voce@email.com"
+              placeholder={t("emailPlaceholder")}
               className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <label className="text-sm text-slate-300">Senha</label>
+              <label className="text-sm text-slate-300">{t("passwordLabel")}</label>
               <Link href="/auth/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300">
-                Esqueceu a senha?
+                {t("forgotPassword")}
               </Link>
             </div>
             <input
@@ -120,14 +122,14 @@ export default function LoginPage() {
             className="w-full py-3 rounded-xl font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 transition flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            Entrar
+            {t("signIn")}
           </button>
         </form>
 
         <p className="text-center text-sm text-slate-500">
-          Não tem conta?{" "}
+          {t("noAccount")}{" "}
           <Link href="/auth/signup" className="text-indigo-400 hover:text-indigo-300">
-            Criar conta
+            {t("createAccount")}
           </Link>
         </p>
       </div>

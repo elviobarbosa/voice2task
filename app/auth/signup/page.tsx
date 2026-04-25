@@ -4,8 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function SignupPage() {
+  const t = useTranslations("signup");
+  const tLogin = useTranslations("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,13 +49,12 @@ export default function SignupPage() {
       <main className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-sm text-center space-y-4">
           <div className="text-5xl">✉️</div>
-          <h2 className="text-xl font-bold text-white">Verifique seu email</h2>
+          <h2 className="text-xl font-bold text-white">{t("emailSentTitle")}</h2>
           <p className="text-slate-400 text-sm">
-            Enviamos um link de confirmação para <span className="text-white">{email}</span>.
-            Clique no link para ativar sua conta.
+            {t("emailSentBody", { email })}
           </p>
           <Link href="/auth/login" className="inline-block text-indigo-400 hover:text-indigo-300 text-sm">
-            Voltar para login
+            {t("backToLogin")}
           </Link>
         </div>
       </main>
@@ -66,7 +68,7 @@ export default function SignupPage() {
           <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400">
             Voice to Tasks
           </h1>
-          <p className="text-slate-400 text-sm">Crie sua conta grátis</p>
+          <p className="text-slate-400 text-sm">{t("subtitle")}</p>
         </div>
 
         <div className="space-y-3">
@@ -76,7 +78,7 @@ export default function SignupPage() {
             className="w-full flex items-center justify-center gap-3 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-medium hover:bg-white/10 transition disabled:opacity-50"
           >
             {oauthLoading === "google" ? <Loader2 className="w-4 h-4 animate-spin" /> : <GoogleIcon />}
-            Continuar com Google
+            {tLogin("continueWithGoogle")}
           </button>
 
           <button
@@ -85,50 +87,50 @@ export default function SignupPage() {
             className="w-full flex items-center justify-center gap-3 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-medium hover:bg-white/10 transition disabled:opacity-50"
           >
             {oauthLoading === "facebook" ? <Loader2 className="w-4 h-4 animate-spin" /> : <FacebookIcon />}
-            Continuar com Facebook
+            {tLogin("continueWithFacebook")}
           </button>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-white/10" />
-          <span className="text-xs text-slate-500">ou</span>
+          <span className="text-xs text-slate-500">{tLogin("or")}</span>
           <div className="flex-1 h-px bg-white/10" />
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm text-slate-300">Nome</label>
+            <label className="text-sm text-slate-300">{t("nameLabel")}</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder="Seu nome"
+              placeholder={t("namePlaceholder")}
               className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-slate-300">Email</label>
+            <label className="text-sm text-slate-300">{tLogin("emailLabel")}</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="voce@email.com"
+              placeholder={tLogin("emailPlaceholder")}
               className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-slate-300">Senha</label>
+            <label className="text-sm text-slate-300">{tLogin("passwordLabel")}</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
-              placeholder="Mínimo 8 caracteres"
+              placeholder={t("passwordPlaceholder")}
               className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
             />
           </div>
@@ -145,14 +147,14 @@ export default function SignupPage() {
             className="w-full py-3 rounded-xl font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 transition flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            Criar conta
+            {t("createAccount")}
           </button>
         </form>
 
         <p className="text-center text-sm text-slate-500">
-          Já tem conta?{" "}
+          {t("alreadyHaveAccount")}{" "}
           <Link href="/auth/login" className="text-indigo-400 hover:text-indigo-300">
-            Entrar
+            {t("signIn")}
           </Link>
         </p>
       </div>

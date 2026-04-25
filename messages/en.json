@@ -1,0 +1,94 @@
+{
+  "login": {
+    "subtitle": "Sign in to your account",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithFacebook": "Continue with Facebook",
+    "or": "or",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@email.com",
+    "passwordLabel": "Password",
+    "forgotPassword": "Forgot password?",
+    "signIn": "Sign in",
+    "noAccount": "Don't have an account?",
+    "createAccount": "Create account"
+  },
+  "signup": {
+    "subtitle": "Create your free account",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your name",
+    "passwordPlaceholder": "Minimum 8 characters",
+    "createAccount": "Create account",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "emailSentTitle": "Check your email",
+    "emailSentBody": "We sent a confirmation link to {email}. Click the link to activate your account.",
+    "backToLogin": "Back to login"
+  },
+  "forgotPassword": {
+    "title": "Forgot your password?",
+    "subtitle": "Enter your email and we'll send a reset link.",
+    "sendLink": "Send link",
+    "emailSentTitle": "Email sent",
+    "emailSentBody": "We sent reset instructions to {email}.",
+    "backToLogin": "Back to login"
+  },
+  "onboarding": {
+    "screens": [
+      {
+        "title": "Voice becomes tasks",
+        "body": "Record or share any audio. AI extracts all tasks, deadlines, and owners automatically."
+      },
+      {
+        "title": "Works everywhere",
+        "body": "Meetings, voice memos, calls, personal notes — any audio becomes an action list."
+      },
+      {
+        "title": "Share with your team",
+        "body": "Add members to your plan. Everyone accesses history and extracted tasks in one place."
+      }
+    ],
+    "plans": {
+      "title": "Choose your plan",
+      "subtitle": "Cancel anytime. No commitment.",
+      "perMonth": "/month",
+      "popular": "Popular",
+      "personal": { "seats": "1 user", "minutes": "60 min/month" },
+      "team": { "seats": "5 users", "minutes": "60 min/user" },
+      "business": { "seats": "15 users", "minutes": "60 min/user" },
+      "subscribeAfter": "You can subscribe after exploring the app."
+    },
+    "nav": {
+      "next": "Next",
+      "seePlans": "See plans",
+      "start": "Get started",
+      "back": "Back"
+    }
+  },
+  "history": {
+    "title": "History",
+    "back": "← Back",
+    "usageThisMonth": "Usage this month",
+    "tasks": "{count, plural, one {# task} other {# tasks}}",
+    "noAudioYet": "No audio processed yet.",
+    "processFirst": "Process your first audio →",
+    "noSummary": "No summary"
+  },
+  "home": {
+    "history": "History",
+    "signOut": "Sign out",
+    "subtitle": "Upload your audio and let AI extract all tasks, deadlines, and owners for you.",
+    "usageThisMonth": "Usage this month",
+    "processAnother": "Process another audio"
+  },
+  "upload": {
+    "selectOrDrag": "Select or drag an audio file",
+    "formats": "MP3, WAV, M4A, OGG, OPUS (Max. 15MB)",
+    "selectManually": "Select audio manually",
+    "processing": "Processing with AI...",
+    "process": "✨ Process Audio",
+    "noFile": "Please select an audio file first.",
+    "tooLarge": "File too large. Maximum is 15MB.",
+    "sharedNotAudio": "Shared file is not a supported audio format.",
+    "sharedError": "Error loading shared file: "
+  }
+}

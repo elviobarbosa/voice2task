@@ -96,21 +96,21 @@
 **Approach:** `next-intl` + `navigator.language` detection on client. No manual toggle — fully automatic.
 
 ### Setup
-- [ ] Install `next-intl`
-- [ ] Create `messages/pt.json` + `messages/en.json`
-- [ ] Create `lib/i18n.ts` — detect `navigator.language`, default to `en` if not `pt`
-- [ ] Wrap app with `NextIntlClientProvider` in `layout.tsx`
+- [x] Install `next-intl`
+- [x] Create `messages/pt.json` + `messages/en.json`
+- [x] Create `app/components/I18nProvider.tsx` — detects `navigator.language`, default `en`, wraps app
+- [x] Wrap app with `NextIntlClientProvider` in `layout.tsx`
 
 ### Translate UI strings
-- [ ] Auth screens (login, signup, forgot-password)
-- [ ] Onboarding screens (remove inline EN text, use translations)
-- [ ] History page (labels, empty state, usage meter)
-- [ ] Home page (header, buttons, errors)
-- [ ] Error messages from API route
+- [x] Auth screens (login, signup, forgot-password)
+- [x] Onboarding screens
+- [x] History page (labels, empty state, usage meter)
+- [x] Home page (header, buttons, errors)
+- [x] Upload component
 
 ### API / AI
-- [ ] Update `SYSTEM_PROMPT` to detect audio language and respond in same language
-- [ ] Return task text in audio's language (EN audio → EN tasks, PT audio → PT tasks)
+- [x] Update `SYSTEM_PROMPT` to detect audio language and respond in same language
+- [x] Return task text in audio's language (EN audio → EN tasks, PT audio → PT tasks)
 
 **Deliverable:** PT device → app in Portuguese. EN device → app in English. Audio language independent of UI language.
 
