@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { UploadCloud, Loader2 } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
 import { CapacitorShareTarget } from "@capgo/capacitor-share-target";
+import { supabase } from "@/lib/supabase/client";
 
 interface UploadProps {
   onSuccess: (data: any) => void;
@@ -49,10 +50,12 @@ export default function Upload({ onSuccess }: UploadProps) {
     formData.append("audio", targetFile);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       console.log("Iniciando fetch para /api/process...");
       const res = await fetch("/api/process", {
         method: "POST",
         body: formData,
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
       });
 
       console.log("Resposta recebida. Status:", res.status);

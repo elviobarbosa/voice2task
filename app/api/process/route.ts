@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import openai from "@/lib/openai";
 import { SYSTEM_PROMPT } from "@/lib/prompt";
 import { toFile } from "openai";
+import { getUserFromRequest, createServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -19,6 +20,11 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getUserFromRequest(req.headers.get("authorization"));
+    if (!user) {
+      return NextResponse.json({ error: "Não autorizado." }, { status: 401, headers: corsHeaders });
+    }
+
     console.log("API /process: Recebendo requisição");
     const formData = await req.formData();
     const file = formData.get("audio") as File;
@@ -77,6 +83,11 @@ export async function POST(req: NextRequest) {
       console.error("API /process: Erro ao parsear JSON da IA");
       return NextResponse.json({ error: "Erro ao interpretar resposta da IA." }, { status: 500, headers: corsHeaders });
     }
+
+    const durationSeconds = Math.round((file.size / 16000) * 8);
+    await createServerClient()
+      .from("processings")
+      .insert({ user_id: user.id, duration_seconds: durationSeconds, result_json: resultJson });
 
     console.log("API /process: Retornando resultado");
     return NextResponse.json(resultJson, { headers: corsHeaders });

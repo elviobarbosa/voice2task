@@ -3,16 +3,26 @@
 import { useState } from "react";
 import Upload from "./components/Upload";
 import Result from "./components/Result";
+import { useAuth } from "./components/AuthProvider";
 
 export default function Home() {
   const [result, setResult] = useState<any>(null);
+  const { user, signOut } = useAuth();
 
   return (
     <main className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-12">
         <header className="text-center space-y-4">
+          <div className="flex justify-end">
+            <button
+              onClick={signOut}
+              className="text-xs text-slate-500 hover:text-slate-300 transition"
+            >
+              {user?.email} · Sair
+            </button>
+          </div>
           <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400">
-            🎙️ Voice to Tasks 0.000000000004
+            🎙️ Voice to Tasks
           </h1>
           <p className="text-lg text-slate-400 max-w-xl mx-auto">
             Envie seu áudio e deixe a Inteligência Artificial extrair todas as tarefas, prazos e responsáveis para você.
