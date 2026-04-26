@@ -78,7 +78,26 @@
     "signOut": "Sair",
     "subtitle": "Envie seu áudio e deixe a IA extrair todas as tarefas, prazos e responsáveis para você.",
     "usageThisMonth": "Uso este mês",
-    "processAnother": "Processar outro áudio"
+    "processAnother": "Processar outro áudio",
+    "subscriptionActive": "Assinatura ativada! Você já pode processar áudios."
+  },
+  "paywall": {
+    "limitTitle": "Limite mensal atingido",
+    "limitSubtitle": "Você usou todos os {limit} minutos deste mês. Faça upgrade para continuar.",
+    "noPlanTitle": "Escolha um plano para começar",
+    "noPlanSubtitle": "Processe áudios ilimitados e extraia tarefas com IA.",
+    "perMonth": "/mês",
+    "popular": "Popular",
+    "personal": { "seats": "1 usuário", "minutes": "60 min/mês" },
+    "team": { "seats": "5 usuários", "minutes": "60 min/usuário" },
+    "business": { "seats": "15 usuários", "minutes": "60 min/usuário" },
+    "subscribe": "Assinar",
+    "comingSoon": "Em breve",
+    "cancelAnytime": "Cancele quando quiser. Sem compromisso.",
+    "loading": "Redirecionando para pagamento...",
+    "errorTitle": "Algo deu errado. Tente novamente.",
+    "limitReached": "Limite mensal atingido — faça upgrade para continuar",
+    "upgradeButton": "Ver planos"
   },
   "upload": {
     "selectOrDrag": "Selecione ou arraste um arquivo de áudio",

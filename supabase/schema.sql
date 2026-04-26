@@ -33,6 +33,7 @@ create table public.subscriptions (
   seats int not null default 1,
   minutes_limit int not null,
   stripe_subscription_id text,
+  stripe_customer_id text,
   google_purchase_token text,
   current_period_end timestamptz,
   created_at timestamptz default now()

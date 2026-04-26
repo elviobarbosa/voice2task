@@ -5,17 +5,32 @@ import Link from "next/link";
 import Upload from "./components/Upload";
 import Result from "./components/Result";
 import { useAuth } from "./components/AuthProvider";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 import { supabase } from "@/lib/supabase/client";
-import { History, Clock } from "lucide-react";
+import { History, Clock, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-const MINUTES_LIMIT = 60;
+type ProcessResult = { tasks: { text: string; deadline: string | null; assignee: string | null; priority: string | null }[]; summary: string };
 
 export default function Home() {
   const t = useTranslations("home");
-  const [result, setResult] = useState<any>(null);
+  const tPaywall = useTranslations("paywall");
+  const [result, setResult] = useState<ProcessResult | null>(null);
   const [minutesUsed, setMinutesUsed] = useState(0);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(
+    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("checkout") === "success"
+  );
   const { user, signOut } = useAuth();
+  const { subscription, isActive, loading: subLoading } = useSubscription();
+
+  const MINUTES_LIMIT = subscription?.minutesLimit ?? 60;
+
+  useEffect(() => {
+    if (!checkoutSuccess) return;
+    window.history.replaceState({}, "", "/");
+    const timer = setTimeout(() => setCheckoutSuccess(false), 5000);
+    return () => clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!user) return;
@@ -53,6 +68,29 @@ export default function Home() {
           </button>
         </div>
 
+        {/* checkout success toast */}
+        {checkoutSuccess && (
+          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm text-center">
+            🎉 {t("subscriptionActive")}
+          </div>
+        )}
+
+        {/* no-plan banner */}
+        {!subLoading && !isActive && (
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
+            <div className="flex items-center gap-2 text-sm text-indigo-300">
+              <Zap className="w-4 h-4" />
+              {tPaywall("noPlanTitle")}
+            </div>
+            <Link
+              href="/paywall"
+              className="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg transition"
+            >
+              {tPaywall("upgradeButton")}
+            </Link>
+          </div>
+        )}
+
         <header className="text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400">
             🎙️ Voice to Tasks
@@ -74,6 +112,12 @@ export default function Home() {
               style={{ width: `${pct}%` }}
             />
           </div>
+          {pct >= 100 && (
+            <p className="text-xs text-center text-red-400">
+              {tPaywall("limitReached")}{" "}
+              <Link href="/paywall" className="underline">{tPaywall("upgradeButton")}</Link>
+            </p>
+          )}
         </div>
 
         {!result ? (

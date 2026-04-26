@@ -25,6 +25,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Não autorizado." }, { status: 401, headers: corsHeaders });
     }
 
+    // Entitlement check
+    const serviceClient = createServerClient();
+    const { data: membership } = await serviceClient
+      .from("memberships")
+      .select("org_id, organizations(subscriptions(status, minutes_limit))")
+      .eq("user_id", user.id)
+      .maybeSingle() as { data: { org_id: string; organizations: { subscriptions: { status: string; minutes_limit: number }[] } | null } | null };
+
+    const sub = membership?.organizations?.subscriptions?.[0];
+    if (!sub || sub.status !== "active") {
+      return NextResponse.json(
+        { error: "Sem plano ativo. Acesse /paywall para assinar." },
+        { status: 402, headers: corsHeaders }
+      );
+    }
+
+    const { data: minutesUsedData } = await serviceClient
+      .rpc("minutes_used_this_month", { p_user_id: user.id, p_org_id: membership?.org_id ?? null });
+    const minutesUsed = Number(minutesUsedData ?? 0);
+    if (minutesUsed >= sub.minutes_limit) {
+      return NextResponse.json(
+        { error: "Limite mensal atingido. Acesse /paywall para fazer upgrade." },
+        { status: 402, headers: corsHeaders }
+      );
+    }
+
     console.log("API /process: Recebendo requisição");
     const formData = await req.formData();
     const file = formData.get("audio") as File;
@@ -91,10 +117,11 @@ export async function POST(req: NextRequest) {
 
     console.log("API /process: Retornando resultado");
     return NextResponse.json(resultJson, { headers: corsHeaders });
-  } catch (error: any) {
-    console.error("API Route Error:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Erro interno no servidor.";
+    console.error("API Route Error:", message);
     return NextResponse.json(
-      { error: error.message || "Erro interno no servidor." },
+      { error: message },
       { status: 500, headers: corsHeaders }
     );
   }

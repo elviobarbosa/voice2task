@@ -120,9 +120,9 @@
 *Goal: plans enforced, payments working*
 
 ### 4.1 Entitlement Logic
-- [ ] `useSubscription` hook: reads plan from Supabase
-- [ ] Minute limit enforcement: block processing if monthly usage exceeded
-- [ ] Paywall screen shown when limit reached or no active plan
+- [x] `useSubscription` hook: reads plan from Supabase
+- [x] Minute limit enforcement: block processing if monthly usage exceeded (HTTP 402)
+- [x] Paywall screen shown when limit reached or no active plan
 
 ### 4.2 Personal Plan — Google Play Billing
 - [ ] Install `@revenuecat/purchases-capacitor`
@@ -132,12 +132,14 @@
 - [ ] RevenueCat webhook → Supabase updates subscription status
 
 ### 4.3 Team & Business Plans — Stripe
-- [ ] Create Stripe products: Team ($19.99) and Business ($49.99)
-- [ ] `/api/stripe/checkout` endpoint: creates Checkout Session
-- [ ] `/api/stripe/webhook` endpoint: handles `customer.subscription.*` events
-- [ ] App opens Stripe Checkout in browser (Capacitor Browser plugin)
-- [ ] Deep link back to app after payment
-- [ ] Supabase subscription record updated via webhook
+- [ ] Create Stripe products: Team ($19.99) and Business ($49.99) → get `STRIPE_PRICE_TEAM` + `STRIPE_PRICE_BUSINESS`
+- [x] `/api/stripe/checkout` endpoint: creates Checkout Session
+- [x] `/api/stripe/webhook` endpoint: handles `checkout.session.completed`, `subscription.updated/deleted`, `invoice.payment_failed`
+- [x] App redirects to Stripe Checkout (WebView navigation)
+- [x] Redirect back to app after payment (`/?checkout=success`)
+- [x] Supabase subscription record upserted via webhook
+- [ ] Configure webhook in Stripe Dashboard → `https://voice2task-ten.vercel.app/api/stripe/webhook` → get `STRIPE_WEBHOOK_SECRET`
+- [ ] Add `stripe_customer_id` column → run `supabase/migrations/001_add_stripe_customer_id.sql`
 
 **Deliverable:** All 3 plans purchasable. Usage limits enforced.
 

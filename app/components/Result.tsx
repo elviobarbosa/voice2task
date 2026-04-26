@@ -7,7 +7,7 @@ interface Task {
   text: string;
   deadline: string | null;
   assignee: string | null;
-  priority: "Alta" | "Média" | "Baixa" | null;
+  priority: string | null;
 }
 
 interface ResultProps {
@@ -72,8 +72,8 @@ export default function Result({ data }: ResultProps) {
                 <div className="flex flex-wrap gap-2">
                   {task.priority && (
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      task.priority.toLowerCase() === 'alta' ? 'bg-red-500/20 text-red-300 border border-red-500/20' :
-                      task.priority.toLowerCase() === 'média' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/20' :
+                      /alta|high/i.test(task.priority) ? 'bg-red-500/20 text-red-300 border border-red-500/20' :
+                      /média|medium/i.test(task.priority) ? 'bg-amber-500/20 text-amber-300 border border-amber-500/20' :
                       'bg-emerald-500/20 text-emerald-300 border border-emerald-500/20'
                     }`}>
                       Prioridade: {task.priority}

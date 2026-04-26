@@ -78,7 +78,26 @@
     "signOut": "Sign out",
     "subtitle": "Upload your audio and let AI extract all tasks, deadlines, and owners for you.",
     "usageThisMonth": "Usage this month",
-    "processAnother": "Process another audio"
+    "processAnother": "Process another audio",
+    "subscriptionActive": "Subscription activated! You can now process audio."
+  },
+  "paywall": {
+    "limitTitle": "Monthly limit reached",
+    "limitSubtitle": "You've used all {limit} minutes for this month. Upgrade to continue.",
+    "noPlanTitle": "Choose a plan to get started",
+    "noPlanSubtitle": "Process unlimited audio files and extract tasks with AI.",
+    "perMonth": "/month",
+    "popular": "Popular",
+    "personal": { "seats": "1 user", "minutes": "60 min/month" },
+    "team": { "seats": "5 users", "minutes": "60 min/user" },
+    "business": { "seats": "15 users", "minutes": "60 min/user" },
+    "subscribe": "Subscribe",
+    "comingSoon": "Coming soon",
+    "cancelAnytime": "Cancel anytime. No commitment.",
+    "loading": "Redirecting to payment...",
+    "errorTitle": "Something went wrong. Try again.",
+    "limitReached": "Monthly limit reached — upgrade to continue",
+    "upgradeButton": "See plans"
   },
   "upload": {
     "selectOrDrag": "Select or drag an audio file",
